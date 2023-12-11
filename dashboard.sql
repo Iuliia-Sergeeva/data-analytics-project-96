@@ -13,9 +13,9 @@ select
     s.medium as utm_medium,
     coalesce(s.campaign, 'organic') as utm_campaign,
     to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
-    extract(week from visit_date) as visit_week,
-    extract(month from visit_date) as visit_month,
-    count(visitor_id) as count_visitor
+    extract(week from s.visit_date) as visit_week,
+    extract(month from s.visit_date) as visit_month,
+    count(s.visitor_id) as count_visitor
 from sessions as s
 group by 1, 2, 3, 4, 5, 6
 
