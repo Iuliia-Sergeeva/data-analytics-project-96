@@ -9,15 +9,15 @@ order by 2 desc
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
 select
-    source,
-    medium,
-    coalesce(campaign, 'organic') as utm_campaign,
-    to_char(visit_date, 'DD-MM-YYYY') as visit_date,
+    s.source as utm_source,
+    s.medium as utm_medium,
+    coalesce(s.campaign, 'organic') as utm_campaign,
+    to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
     extract(week from visit_date) as visit_week,
     extract(month from visit_date) as visit_month,
     count(visitor_id) as count_visitor
-from sessions
-group by 1, 2, 3, 4, 6, 7
+from sessions as s
+group by 1, 2, 3, 4, 5, 6
 
 
 --используем конструкцию из данного запроса для ответа на вопрос выше по модели Last Paid Click
@@ -113,7 +113,7 @@ group by 1, 2, 3, 4
 
 
 --Окупаются ли каналы?
-with tab as (
+with cost_recovery as (
     select
         s.visit_date,
         s.source as utm_source,
@@ -127,17 +127,17 @@ with tab as (
         l.status_id,
         null as total_cost,
         row_number()
-        over (partition by s.visitor_id order by s.visit_date desc)
+            over (partition by s.visitor_id order by s.visit_date desc)
         as rn
     from sessions as s
     left join leads as l
         on
             s.visitor_id = l.visitor_id
             and s.visit_date <= l.created_at
-    where medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
+    where s.medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 ),
 
-aggregate_last_paid_click as (
+aggregate_last_paid_click_2 as (
     select
         to_char(visit_date, 'DD-MM-YYYY') as visit_date,
         utm_source,
@@ -155,7 +155,7 @@ aggregate_last_paid_click as (
             end
         ) as purchases_count,
         sum(amount) as revenue
-    from tab
+    from cost_recovery
     where rn = 1
     group by 1, 2, 3, 4
 
@@ -196,7 +196,7 @@ select
     sum(purchases_count) as purchases_count,
     coalesce(sum(revenue), 0) as revenue,
     coalesce(sum(total_cost) / sum(visitors_count), 0) as cpu
-from aggregate_last_paid_click
+from aggregate_last_paid_click_2
 where utm_source in ('yandex', 'vk')
 group by 1, 2, 3, 4
 order by
@@ -211,25 +211,25 @@ order by
 with close_leads as (
     select
         s.visitor_id,
-        visit_date,
-        source,
-        medium,
-        campaign,
-        created_at,
-        closing_reason,
-        status_id,
-        lead_id,
-        coalesce(amount, 0) as amount,
+        s.visit_date,
+        s.source,
+        s.medium,
+        s.campaign,
+        l.created_at,
+        l.closing_reason,
+        l.status_id,
+        l.lead_id,
+        coalesce(l.amount, 0) as amount,
         row_number()
-        over (partition by s.visitor_id order by visit_date desc)
+            over (partition by s.visitor_id order by s.visit_date desc)
         as rn,
-        created_at - visit_date as days
+        l.created_at - s.visit_date as days
     from sessions as s
-    left join leads
+    left join leads as l
         on
-            s.visitor_id = leads.visitor_id
-            and visit_date <= created_at
-    where medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
+            s.visitor_id = l.visitor_id
+            and s.visit_date <= l.created_at
+    where s.medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 )
 
 select
@@ -237,7 +237,7 @@ select
     cl.created_at,
     cl.lead_id,
     cl.days,
-    sum(cl.amount),
+    sum(cl.amount) as amount,
     ntile(10) over (order by cl.days) as group_ntile
 from close_leads as cl
 where
@@ -245,6 +245,7 @@ where
     and cl.status_id = 142
 group by 1, 2, 3, 4
 order by 4
+
 
 
 --Заметна ли корреляция между запуском рекламной компании и органикой?
