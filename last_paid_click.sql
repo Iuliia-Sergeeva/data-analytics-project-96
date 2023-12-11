@@ -39,4 +39,4 @@ order by
     utm_source asc nulls last,
     utm_medium asc nulls last,
     utm_campaign asc nulls last
-limit 10;
+;
