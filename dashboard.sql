@@ -13,9 +13,9 @@ select
     medium,
     coalesce(campaign, 'organic') as utm_campaign,
     to_char(visit_date, 'DD-MM-YYYY') as visit_date,
-    count(visitor_id) as count_visitor,
     extract(week from visit_date) as visit_week,
-    extract(month from visit_date) as visit_month
+    extract(month from visit_date) as visit_month,
+    count(visitor_id) as count_visitor
 from sessions
 group by 1, 2, 3, 4, 6, 7
 
@@ -127,7 +127,7 @@ with tab as (
         l.status_id,
         null as total_cost,
         row_number()
-            over (partition by s.visitor_id order by s.visit_date desc)
+        over (partition by s.visitor_id order by s.visit_date desc)
         as rn
     from sessions as s
     left join leads as l
@@ -200,11 +200,11 @@ from aggregate_last_paid_click
 where utm_source in ('yandex', 'vk')
 group by 1, 2, 3, 4
 order by
-    revenue desc nulls last,
-    visitors_count desc,
-    utm_source asc,
-    utm_medium asc,
-    utm_campaign asc
+    9 desc nulls last,
+    5 desc,
+    2 asc,
+    3 asc,
+    4 asc
 
 
 --за сколько дней с момента перехода по рекламе закрывается 90% лидов
@@ -221,7 +221,7 @@ with close_leads as (
         lead_id,
         coalesce(amount, 0) as amount,
         row_number()
-            over (partition by s.visitor_id order by visit_date desc)
+        over (partition by s.visitor_id order by visit_date desc)
         as rn,
         created_at - visit_date as days
     from sessions as s
