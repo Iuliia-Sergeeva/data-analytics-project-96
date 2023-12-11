@@ -15,7 +15,7 @@ with LAST_PAID_CLICK as (
         L.CLOSING_REASON,
         L.STATUS_ID,
         row_number()
-            over (partition by S.VISITOR_ID order by S.VISIT_DATE desc)
+        over (partition by S.VISITOR_ID order by S.VISIT_DATE desc)
         as RN
     from SESSIONS as S
     left join LEADS as L
@@ -23,7 +23,7 @@ with LAST_PAID_CLICK as (
             S.VISITOR_ID = L.VISITOR_ID
             and S.VISIT_DATE <= L.CREATED_AT
     where
-        MEDIUM
+        S.MEDIUM
         in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 )
 

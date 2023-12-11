@@ -9,7 +9,7 @@ order by 1 desc
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
 select
-    "source",
+    source,
     medium as utm_medium,
     coalesce(campaign, 'organic') as utm_campaign,
     to_char(visit_date, 'DD-MM-YYYY') as visit_date,
