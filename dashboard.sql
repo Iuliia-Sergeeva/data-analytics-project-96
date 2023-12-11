@@ -10,7 +10,7 @@ order by 2 desc
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
 select
     source,
-    medium as utm_medium,
+    medium,
     coalesce(campaign, 'organic') as utm_campaign,
     to_char(visit_date, 'DD-MM-YYYY') as visit_date,
     count(visitor_id) as count_visitor,
@@ -92,24 +92,24 @@ select
     cost_vk + cost_yandex as total_costs
 from tab_cost;
 
-costs as (
-	select
-		to_char(campaign_date, 'DD-MM-YYYY') as visit_date,
-		utm_source,
-		utm_medium,
-		utm_campaign,
-		sum(daily_spent) as total_cost
-	from vk_ads as va
-	group by 1,2,3,4
-	union all
-	select
-		to_char(ya.campaign_date, 'DD-MM-YYYY') as visit_date,
-		utm_source,
-		utm_medium,
-		utm_campaign,
-		sum(daily_spent) as total_cost        
-	from ya_ads as ya
-	group by 1,2,3,4)
+--Общие затраты по рекламе
+select
+    to_char(campaign_date, 'DD-MM-YYYY') as visit_date,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    sum(daily_spent) as total_cost
+from vk_ads
+group by 1, 2, 3, 4
+union all
+select
+    to_char(ya.campaign_date, 'DD-MM-YYYY') as visit_date,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    sum(daily_spent) as total_cost
+from ya_ads as ya
+group by 1, 2, 3, 4
 
 
 --Окупаются ли каналы?

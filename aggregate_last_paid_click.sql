@@ -106,9 +106,9 @@ select
 from aggregate_last_paid_click
 group by 1, 2, 3, 4
 order by
-    revenue desc nulls last,
-    visit_date asc,
-    visitors_count desc,
-    utm_source asc,
-    utm_medium asc,
-    utm_campaign asc;
+    9 desc nulls last,
+    1 asc,
+    5 desc,
+    2 asc,
+    3 asc,
+    4 asc;
