@@ -5,8 +5,7 @@ select
     source
 from sessions
 group by 2
-order by 1 desc;
-
+order by 1 desc
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
 select
@@ -18,7 +17,7 @@ select
     extract(week from visit_date) as visit_week,
     extract(month from visit_date) as visit_month
 from sessions
-group by 1, 2, 3, 4, 6, 7;
+group by 1, 2, 3, 4, 6, 7
 
 
 --используем конструкцию из данного запроса для ответа на вопрос выше по модели Last Paid Click
@@ -53,12 +52,12 @@ select
 from LAST_PAID_CLICK
 where RN = 1
 group by 1, 2, 3
-order by 4 desc;
+order by 4 desc
 
 
 --Сколько лидов к нам приходят?
 select count(distinct lead_id) as count_leads
-from leads;
+from leads
 
 
 --конверсия лидов в клиентов, конверсия из клика в лид
@@ -77,7 +76,7 @@ select
         count_lead * 100.0 / (select count(visitor_id) from sessions), 2
     ) as cr_cl,
     round(count_clients * 100.0 / count_lead, 2) as cr_l
-from tab_leads;
+from tab_leads
 
 
 --Сколько мы тратим по разным каналам в динамике?
@@ -111,7 +110,6 @@ costs as(
 		sum(daily_spent) as total_cost        
 	from ya_ads as ya
 	group by 1,2,3,4)
-;
 
 
 --Окупаются ли каналы?
@@ -206,7 +204,7 @@ order by
     visitors_count desc,
     utm_source asc,
     utm_medium asc,
-    utm_campaign asc;
+    utm_campaign asc
 
 
 --за сколько дней с момента перехода по рекламе закрывается 90% лидов
@@ -246,10 +244,10 @@ where
     cl.rn = 1
     and cl.status_id = 142
 group by 1, 2, 3, 4
-order by 4;
+order by 4
 
 
---Есть ли заметная корреляция между запуском рекламной компании и ростом органики?
+--Заметна ли корреляция между запуском рекламной компании и органикой?
 --Строим график в Google Sheets и Superset
 with tab_cor as (
     select
