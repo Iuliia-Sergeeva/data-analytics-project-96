@@ -1,23 +1,28 @@
 --Сколько у нас пользователей заходят на сайт?
-select
-    source,
-    to_char(visit_date, 'DD-MM-YYYY') as visit_date,
-    count(visitor_id) as distinct_visitor
-from sessions
-group by 1
-order by 2 desc
+with tab_visitors as (
+    select count(visitor_id) as distinct_visitor
+    from sessions
+)
+
+select *
+from tab_visitors
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
-select
-    S.SOURCE as UTM_SOURCE,
-    S.MEDIUM as UTM_MEDIUM,
-    S.CAMPAIGN as UTM_CAMPAIGN,
-    to_char(S.VISIT_DATE, 'DD-MM-YYYY') as VISIT_DATE,
-    extract(week from S.VISIT_DATE) as VISIT_WEEK,
-    extract(month from S.VISIT_DATE) as VISIT_MONTH,
-    count(S.VISITOR_ID) as COUNT_VISITOR
-from SESSIONS as S
-group by 1, 2, 3, 4, 5, 6
+with tab_visit_sourse as (
+    select
+        s.source as utm_source,
+        s.medium as utm_medium,
+        s.campaign as utm_campaign,
+        to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
+        extract(week from s.visit_date) as visit_week,
+        extract(month from s.visit_date) as visit_month,
+        count(s.visitor_id) as count_visitor
+    from sessions as s
+    group by 1, 2, 3, 4, 5, 6
+)
+
+select *
+from tab_visit_sourse
 
 
 --используем конструкцию из данного запроса для ответа на вопрос выше по модели Last Paid Click
@@ -56,8 +61,13 @@ order by 4 desc
 
 
 --Сколько лидов к нам приходят?
+with tab_leads as (
 select count(distinct lead_id) as count_leads
 from leads
+)
+
+select *
+from tab_leads
 
 
 --конверсия лидов в клиентов, конверсия из клика в лид
@@ -93,23 +103,29 @@ select
 from tab_cost;
 
 --Общие затраты по рекламе
-select
-    to_char(campaign_date, 'DD-MM-YYYY') as visit_date,
-    utm_source,
-    utm_medium,
-    utm_campaign,
-    sum(daily_spent) as total_cost
-from vk_ads
-group by 1, 2, 3, 4
-union all
-select
-    to_char(ya.campaign_date, 'DD-MM-YYYY') as visit_date,
-    utm_source,
-    utm_medium,
-    utm_campaign,
-    sum(daily_spent) as total_cost
-from ya_ads as ya
-group by 1, 2, 3, 4
+with tab_total_cost as (
+    select
+        to_char(campaign_date, 'DD-MM-YYYY') as visit_date,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        sum(daily_spent) as total_cost
+    from vk_ads
+    group by 1, 2, 3, 4
+    union all
+    select
+        to_char(ya.campaign_date, 'DD-MM-YYYY') as visit_date,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        sum(daily_spent) as total_cost
+    from ya_ads as ya
+    group by 1, 2, 3, 4
+)
+
+select *
+from tab_total_cost
+
 
 
 --Окупаются ли каналы?
