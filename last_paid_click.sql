@@ -1,5 +1,6 @@
 --Шаг 2. Сценарий атрибуции
---запрос для атрибуции лидов по модели Last Paid Click (топ-10 записей)
+--запрос для атрибуции лидов
+--по модели Last Paid Click
 with LAST_PAID_CLICK as (
     select
         S.VISITOR_ID,
@@ -13,14 +14,19 @@ with LAST_PAID_CLICK as (
         L.CLOSING_REASON,
         L.STATUS_ID,
         row_number()
-            over (partition by S.VISITOR_ID order by S.VISIT_DATE desc)
+            over (
+                partition by S.VISITOR_ID
+                order by S.VISIT_DATE desc
+            )
         as RN
     from SESSIONS as S
     left join LEADS as L
         on
             S.VISITOR_ID = L.VISITOR_ID
             and S.VISIT_DATE <= L.CREATED_AT
-    where MEDIUM in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
+    where
+        MEDIUM
+        in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 )
 
 select
