@@ -1,42 +1,44 @@
 --Шаг 2. Сценарий атрибуции
 --запрос для атрибуции лидов по модели Last Paid Click (топ-10 записей)
-with Last_Paid_Click as (
+with LAST_PAID_CLICK as (
     select
-        s.visitor_id,
-        s.visit_date,
-        s.source as utm_source,
-        s.medium as utm_medium,
-        s.campaign as utm_campaign,
-        l.lead_id,
-        l.created_at,
-        l.amount,
-        l.closing_reason,
-        l.status_id,
+        S.VISITOR_ID,
+        S.VISIT_DATE,
+        S.SOURCE as UTM_SOURCE,
+        S.MEDIUM as UTM_MEDIUM,
+        S.CAMPAIGN as UTM_CAMPAIGN,
+        L.LEAD_ID,
+        L.CREATED_AT,
+        L.AMOUNT,
+        L.CLOSING_REASON,
+        L.STATUS_ID,
         row_number()
-            over (partition by s.visitor_id order by s.visit_date desc) as rn
-from sessions s
-left join leads l
-on l.visitor_id = s.visitor_id
-and l.created_at >= s.visit_date 
-where medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
+            over (partition by S.VISITOR_ID order by S.VISIT_DATE desc)
+        as RN
+    from SESSIONS as S
+    left join LEADS as L
+        on
+            S.VISITOR_ID = L.VISITOR_ID
+            and S.VISIT_DATE <= L.CREATED_AT
+    where MEDIUM in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 )
+
 select
-    visitor_id,
-    visit_date,
-    utm_source,
-    utm_medium,
-    utm_campaign,
-    lead_id,
-    created_at,
-    amount,
-    closing_reason,
-    status_id
-from Last_Paid_Click
-where rn = 1
+    VISITOR_ID,
+    VISIT_DATE,
+    UTM_SOURCE,
+    UTM_MEDIUM,
+    UTM_CAMPAIGN,
+    LEAD_ID,
+    CREATED_AT,
+    AMOUNT,
+    CLOSING_REASON,
+    STATUS_ID
+from LAST_PAID_CLICK
+where RN = 1
 order by
-    amount desc nulls last,
-    visit_date asc nulls last,
-    utm_source asc nulls last,
-    utm_medium asc nulls last,
-    utm_campaign asc nulls last
-;
+    AMOUNT desc nulls last,
+    VISIT_DATE asc nulls last,
+    UTM_SOURCE asc nulls last,
+    UTM_MEDIUM asc nulls last,
+    UTM_CAMPAIGN asc nulls last;
