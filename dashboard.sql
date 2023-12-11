@@ -1,14 +1,14 @@
 --Сколько у нас пользователей заходят на сайт?
 select
     to_char(visit_date, 'DD-MM-YYYY') as visit_date,
-    count(visitor_id) as distinct_visitor,
-    source
+    source,
+    count(visitor_id) as distinct_visitor
 from sessions
 group by 2
 order by 1 desc
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
-select
+select 
     source,
     medium as utm_medium,
     coalesce(campaign, 'organic') as utm_campaign,
