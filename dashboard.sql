@@ -1,14 +1,14 @@
 --Сколько у нас пользователей заходят на сайт?
 select
-    to_char(visit_date, 'DD-MM-YYYY') as visit_date,
     source,
+    to_char(visit_date, 'DD-MM-YYYY') as visit_date,
     count(visitor_id) as distinct_visitor
 from sessions
-group by 2
-order by 1 desc
+group by 1
+order by 2 desc
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
-select 
+select
     source,
     medium as utm_medium,
     coalesce(campaign, 'organic') as utm_campaign,
@@ -92,7 +92,7 @@ select
     cost_vk + cost_yandex as total_costs
 from tab_cost;
 
-costs as(
+costs as (
 	select
 		to_char(campaign_date, 'DD-MM-YYYY') as visit_date,
 		utm_source,
