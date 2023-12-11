@@ -95,16 +95,16 @@ aggregate_last_paid_click as (
 
 select
     visit_date,
-    sum(visitors_count) as visitors_count,
     utm_source,
     utm_medium,
     utm_campaign,
+    sum(visitors_count) as visitors_count,
     sum(total_cost) as total_cost,
     sum(leads_count) as leads_count,
     sum(purchases_count) as purchases_count,
     sum(revenue) as revenue
 from aggregate_last_paid_click
-group by 1, 3, 4, 5
+group by 1, 2, 3, 4
 order by
     revenue desc nulls last,
     visit_date asc,
