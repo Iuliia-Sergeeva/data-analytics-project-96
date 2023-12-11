@@ -10,7 +10,7 @@ from tab_visitors
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
 with tab_visit_sourse as (
     select
-        s.source as utm_source,
+        's.source' as utm_source,
         s.medium as utm_medium,
         s.campaign as utm_campaign,
         to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
