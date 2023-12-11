@@ -17,7 +17,6 @@ utm_source, utm_medium, utm_campaign — в алфавитном порядке
 --Создать и написать для агрегации данных из модели атрибуции Last Paid Click aggregate_last_paid_click.sql
 --Сохранить топ-15 записей в aggregate_last_paid_click.csv согласно требованиям по сортировке
 
-
 with tab as (
     select
         s.visit_date,
@@ -36,7 +35,8 @@ with tab as (
         as rn
     from sessions as s
     left join leads as l
-        on s.visitor_id = l.visitor_id and s.visit_date <= l.created_at
+        on s.visitor_id = l.visitor_id
+        and s.visit_date <= l.created_at
     where medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 ),
 
@@ -52,15 +52,15 @@ aggregate_last_paid_click as (
         sum(
             case
                 when
-                    closing_reason = 'Успешно реализовано' or status_id = '142'
+                    closing_reason = 'Успешно реализовано' or status_id = 142
                     then 1
                 else 0
             end
         ) as purchases_count,
-        amount as revenue
+        sum(amount) as revenue
     from tab
-    where rn = '1'
-    group by 1, 2, 3, 4, amount
+    where rn = 1
+    group by 1, 2, 3, 4
 
     union all
     select
@@ -87,7 +87,6 @@ aggregate_last_paid_click as (
         null as revenue
     from ya_ads as ya
 )
-
 select
     visit_date,
     utm_source,
@@ -107,4 +106,4 @@ order by
     utm_source asc,
     utm_medium asc,
     utm_campaign asc
-limit 15;
+;
