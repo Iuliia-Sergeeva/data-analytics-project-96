@@ -14,8 +14,8 @@ with tab_visit_sourse as (
         s.medium as utm_medium,
         s.campaign as utm_campaign,
         to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
-        extract(week from s.visit_date) as visit_week,
-        extract(month from s.visit_date) as visit_month,
+        extract('week' from s.visit_date) as visit_week,
+        extract('month' from s.visit_date) as visit_month,
         count(s.visitor_id) as count_visitor
     from sessions as s
     group by 1, 2, 3, 4, 5, 6
@@ -61,13 +61,13 @@ order by 4 desc
 
 
 --Сколько лидов к нам приходят?
-with tab_leads as (
+with tab_count_leads as (
     select count(distinct lead_id) as count_leads
     from leads
 )
 
 select *
-from tab_leads
+from tab_count_leads
 
 
 --конверсия лидов в клиентов, конверсия из клика в лид
@@ -129,7 +129,7 @@ from tab_total_cost
 
 
 --Окупаются ли каналы?
-with cost_recovery as (
+with recovers as (
     select
         s.visit_date,
         s.source as utm_source,
@@ -171,7 +171,7 @@ aggregate_last_paid_click_4 as (
             end
         ) as purchases_count,
         sum(amount) as revenue
-    from cost_recovery
+    from recovers
     where rn = 1
     group by 1, 2, 3, 4
 
@@ -239,7 +239,7 @@ with close_leads as (
         row_number()
         over (partition by s.visitor_id order by s.visit_date desc)
         as rn,
-        l.created_at - s.visit_date as days
+        l.created_at - s.visit_date as days_d
     from sessions as s
     left join leads as l
         on
@@ -252,7 +252,7 @@ select
     cl.visit_date,
     cl.created_at,
     cl.lead_id,
-    cl.days,
+    cl.days_d,
     sum(cl.amount) as amount,
     ntile(10) over (order by cl.days) as group_ntile
 from close_leads as cl
