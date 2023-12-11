@@ -9,14 +9,14 @@ order by 2 desc
 
 --Какие каналы их приводят на сайт? Хочется видеть по дням/неделям/месяцам
 select
-    s.source as utm_source,
-    s.medium as utm_medium,
-    coalesce(s.campaign, 'organic') as utm_campaign,
-    to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
-    extract(week from s.visit_date) as visit_week,
-    extract(month from s.visit_date) as visit_month,
-    count(s.visitor_id) as count_visitor
-from sessions as s
+    S.SOURCE as UTM_SOURCE,
+    S.MEDIUM as UTM_MEDIUM,
+    S.CAMPAIGN as UTM_CAMPAIGN,
+    to_char(S.VISIT_DATE, 'DD-MM-YYYY') as VISIT_DATE,
+    extract(week from S.VISIT_DATE) as VISIT_WEEK,
+    extract(month from S.VISIT_DATE) as VISIT_MONTH,
+    count(S.VISITOR_ID) as COUNT_VISITOR
+from SESSIONS as S
 group by 1, 2, 3, 4, 5, 6
 
 
