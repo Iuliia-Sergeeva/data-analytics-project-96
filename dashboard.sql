@@ -26,7 +26,7 @@ from tab_visit_sourse
 
 
 --используем конструкцию из данного запроса для ответа на вопрос выше по модели Last Paid Click
-with LAST_PAID_CLICK as (
+with LAST_PAID_CLICK_3 as (
     select
         S.VISITOR_ID,
         S.VISIT_DATE,
@@ -40,13 +40,13 @@ with LAST_PAID_CLICK as (
         L.STATUS_ID,
         row_number()
             over (partition by S.VISITOR_ID order by S.VISIT_DATE desc)
-        as RN
+        as rn
     from SESSIONS as S
     left join LEADS as L
         on
             S.VISITOR_ID = L.VISITOR_ID
             and S.VISIT_DATE <= L.CREATED_AT
-    where MEDIUM in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
+    where S.MEDIUM in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 )
 
 select
@@ -54,16 +54,16 @@ select
     UTM_MEDIUM,
     to_char(VISIT_DATE, 'DD-MM-YYYY') as VISIT_DATE,
     count(VISITOR_ID) as COUNT_VISITORS
-from LAST_PAID_CLICK
-where RN = 1
+from LAST_PAID_CLICK_3
+where rn = 1
 group by 1, 2, 3
 order by 4 desc
 
 
 --Сколько лидов к нам приходят?
 with tab_leads as (
-select count(distinct lead_id) as count_leads
-from leads
+    select count(distinct lead_id) as count_leads
+    from leads
 )
 
 select *
@@ -143,7 +143,7 @@ with cost_recovery as (
         l.status_id,
         null as total_cost,
         row_number()
-            over (partition by s.visitor_id order by s.visit_date desc)
+        over (partition by s.visitor_id order by s.visit_date desc)
         as rn
     from sessions as s
     left join leads as l
@@ -153,7 +153,7 @@ with cost_recovery as (
     where s.medium in ('cpc', 'cpm', 'cpa', 'youtube', 'cpp', 'tg', 'social')
 ),
 
-aggregate_last_paid_click_2 as (
+aggregate_last_paid_click_4 as (
     select
         to_char(visit_date, 'DD-MM-YYYY') as visit_date,
         utm_source,
@@ -212,7 +212,7 @@ select
     sum(purchases_count) as purchases_count,
     coalesce(sum(revenue), 0) as revenue,
     coalesce(sum(total_cost) / sum(visitors_count), 0) as cpu
-from aggregate_last_paid_click_2
+from aggregate_last_paid_click_4
 where utm_source in ('yandex', 'vk')
 group by 1, 2, 3, 4
 order by
@@ -237,7 +237,7 @@ with close_leads as (
         l.lead_id,
         coalesce(l.amount, 0) as amount,
         row_number()
-            over (partition by s.visitor_id order by s.visit_date desc)
+        over (partition by s.visitor_id order by s.visit_date desc)
         as rn,
         l.created_at - s.visit_date as days
     from sessions as s
@@ -261,7 +261,6 @@ where
     and cl.status_id = 142
 group by 1, 2, 3, 4
 order by 4
-
 
 
 --Заметна ли корреляция между запуском рекламной компании и органикой?
