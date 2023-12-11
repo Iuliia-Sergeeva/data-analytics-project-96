@@ -61,9 +61,13 @@ order by 4 desc
 
 
 --Сколько лидов к нам приходят?
-select count(distinct lead_id) as count_leads
-from leads
+with tab_count_leads as (
+    select count(distinct lead_id) as count_leads
+    from leads
+)
 
+select count_leads
+from tab_count_leads
 
 --конверсия лидов в клиентов, конверсия из клика в лид
 with tab_leads as (
