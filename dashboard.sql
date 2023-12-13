@@ -10,14 +10,23 @@ from tab_visitors
 --Какие каналы их приводят на сайт? По дням, неделям, месяцам
 with tab_visit_sourse as (
     select
-        "s.source" as utm_source,
-        s.medium as utm_medium,
-        s.campaign as utm_campaign,
-        to_char(s.visit_date, 'DD-MM-YYYY') as visit_date,
-        extract('week' from s.visit_date) as visit_week,
-        extract('month' from s.visit_date) as visit_month,
-        count(s.visitor_id) as count_visitor
-    from sessions as s
+        case
+            when "source" like '%andex%' then 'yandex'
+            when "source" like '%telegram%' then 'telegram'
+            when "source" like '%tg%' then 'telegram'
+            when "source" like '%vc%' then 'vk'
+            when "source" like '%vk%' then 'vk'
+            when "source" like '%facebook%' then 'facebook'
+            when "source" like '%twitter%' then 'twitter'
+            else "source"
+        end as utm_source,
+        medium as utm_medium,
+        coalesce(campaign, 'organic') as utm_campaign,
+        to_char(visit_date, 'DD-MM-YYYY') as visit_date,
+        extract(week from visit_date) as visit_week,
+        extract(month from visit_date) as visit_month,
+        count(visitor_id) as count_visitor
+    from sessions
     group by 1, 2, 3, 4, 5, 6
 )
 
